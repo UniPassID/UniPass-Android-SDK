@@ -2,14 +2,12 @@ package com.unipass.core
 
 import android.content.Context
 import android.content.Intent
-import android.icu.util.Output
 import android.net.Uri
-import android.os.Build
 import androidx.browser.customtabs.CustomTabsIntent
 import com.google.gson.GsonBuilder
 import com.unipass.core.types.*
 import java.util.*
-import java.util.concurrent.CompletableFuture
+import java8.util.concurrent.CompletableFuture
 
 class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
@@ -39,9 +37,11 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
         if (uniPassSDKOptions.walletUrl == null || uniPassSDKOptions.walletUrl?.isEmpty() == true) {
             if (uniPassSDKOptions.network == Network.MAINNET) {
-                uniPassSDKOptions.walletUrl = "https://wallet.unipass.id"
+//                uniPassSDKOptions.walletUrl = "https://wallet.unipass.id"
+                uniPassSDKOptions.walletUrl = "http://localhost:1901/"
             } else {
-                uniPassSDKOptions.walletUrl = "https://testnet.wallet.unipass.id"
+//                uniPassSDKOptions.walletUrl = "https://testnet.wallet.unipass.id"
+                uniPassSDKOptions.walletUrl = "http://localhost:1901/"
             }
         }
         walletUrl = Uri.parse(uniPassSDKOptions.walletUrl)
@@ -81,10 +81,9 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             .encodedAuthority(walletUrl.encodedAuthority)
             .encodedPath(walletUrl.encodedPath)
             .appendPath(path)
+            .appendQueryParameter("redirectUrl", initParams["redirectUrl"].toString())
             .fragment(hash)
             .build()
-
-        println(url.toString())
 
         val defaultBrowser = context.getDefaultBrowser()
         val customTabsBrowsers = context.getCustomTabsBrowsers()
@@ -101,7 +100,6 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             // Open in browser externally
             context.startActivity(Intent(Intent.ACTION_VIEW, url))
         }
-
     }
 
     private fun completeFutureWithException(exception: Exception) {
@@ -119,21 +117,16 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
      * receive redirect url params and set result for request
      */
     fun setResultUrl(uri: Uri?) {
-        val hash = uri?.fragment
-        if (hash == null) {
-            completeFutureWithException(UserCancelledException())
-            return
-        }
+        val hash = uri?.fragment ?: return
         val error = uri.getQueryParameter("error")
         if (error != null) {
             completeFutureWithException(UnKnownException(error))
         }
-
-
-        var output = gson.fromJson(
+        var  output = gson.fromJson(
             decodeBase64URLString(hash).toString(Charsets.UTF_8),
             BaseOutput::class.java
         )
+
         if (output.error?.isNotBlank() == true) {
             completeFutureWithException(
                 UnKnownException(
@@ -144,10 +137,15 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
         when (output.type) {
             OutputType.Login -> {
+                output = gson.fromJson(
+                    decodeBase64URLString(hash).toString(Charsets.UTF_8),
+                    LoginOutput::class.java
+                )
+                SharedPreferenceUtil.saveItem(context, SharedPreferenceUtil.SESSION_KEY, gson.toJson(output))
                 loginCompletableFuture.complete(output as LoginOutput)
             }
             OutputType.Logout -> {
-                logoutCompletableFuture.complete(output as LogoutOutput)
+                logoutCompletableFuture.complete(null)
             }
             OutputType.SignMessage -> {
                 signMessageCompletableFuture.complete(output as SignOutput)
@@ -176,6 +174,10 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     }
 
     fun signMessage(signInput: SignInput): CompletableFuture<SignOutput> {
+//        val params = mutableMapOf<string, any>(
+//            "message" to signInput.message
+//        )
+//        val testp = mutableMapOf<string, any>()
         request("sign-message", OutputType.SignMessage)
 
         signMessageCompletableFuture = CompletableFuture()
@@ -213,6 +215,4 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         assertLogin()
         return getUserInfo().address
     }
-
-
 }

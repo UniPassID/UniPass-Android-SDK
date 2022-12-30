@@ -1,61 +1,88 @@
 package com.unipass.demo
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import com.google.android.material.snackbar.Snackbar
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
-import android.view.Menu
-import android.view.MenuItem
-import com.unipass.demo.databinding.ActivityMainBinding
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
+import com.unipass.core.UniPassSDK
+import com.unipass.core.types.LoginOutput
+import com.unipass.core.types.Network
+import com.unipass.core.types.SignInput
+import com.unipass.core.types.UniPassSDKOptions
+import java8.util.concurrent.CompletableFuture
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var unipassInstance: UniPassSDK
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        setContentView((R.layout.activity_main))
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        unipassInstance = UniPassSDK(
+            UniPassSDKOptions(
+                context = this!!,
+                redirectUrl = Uri.parse("unipassapp://com.unipass.wallet/redirect"),
+                network = Network.TESTNET
+            )
+        )
+        unipassInstance.setResultUrl(intent.data)
 
-        setSupportActionBar(binding.toolbar)
+        val loginBtn = findViewById<Button>(R.id.button_first)
+        loginBtn.setOnClickListener { loginIn() }
 
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
+        val logoutBtn = findViewById<Button>(R.id.button_second)
+        logoutBtn.setOnClickListener { loginOut() }
+    }
 
-        binding.fab.setOnClickListener { view ->
-            Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show()
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        unipassInstance.setResultUrl(intent?.data)
+    }
+
+    fun loginIn() {
+        var loginCompletableFuture: CompletableFuture<LoginOutput> = unipassInstance.login()
+        loginCompletableFuture.whenComplete{ output, error ->
+            if (error == null) {
+                Log.d("MainActivity_unipassAuth", "success")
+                val userAddressTextV = findViewById<TextView>(R.id.userAddress)
+                userAddressTextV.text = output?.userInfo?.address
+            } else {
+                Log.d("MainActivity_unipassAuth", error.message ?: "Something went wrong")
+            }
         }
-
-
-
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
+    fun loginOut() {
+        var logoutCompletableFuture = unipassInstance.logout()
+        logoutCompletableFuture.whenComplete{ _, error ->
+            if (error == null) {
+                Log.d("MainActivity_unipassAuth", "success")
+                val userAddressTextV = findViewById<TextView>(R.id.userAddress)
+                userAddressTextV.text = ""
+            } else {
+                Log.d("MainActivity_unipassAuth", error.message ?: "Something went wrong")
+            }
         }
     }
 
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
+    fun signMsg() {
+        if (unipassInstance.isLogin()) {
+            val editText = findViewById<EditText>(R.id.edit_text)
+            var signInput = SignInput(unipassInstance.getAddress(), "signMessage", editText.getText().toString())
+            var signMsgCompletableFuture = unipassInstance.signMessage(signInput)
+            signMsgCompletableFuture.whenComplete{ output, error ->
+                if (error == null) {
+                    Log.d("MainActivity_unipassAuth", "success")
+                    editText.setText(output.signature)
+                } else {
+                    Log.d("MainActivity_unipassAuth", error.message ?: "Something went wrong")
+                }
+            }
+        }
     }
 }

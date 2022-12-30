@@ -23,9 +23,4 @@ object SharedPreferenceUtil {
         val sharedPreference = context.getSharedPreferences(UNIPASS_PREF, Context.MODE_PRIVATE)
         sharedPreference.edit().remove(key)?.apply()
     }
-
-
-
-
-
 }

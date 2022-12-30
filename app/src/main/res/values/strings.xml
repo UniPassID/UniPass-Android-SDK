@@ -1,12 +1,11 @@
 <resources>
     <string name="app_name">UniPass-Android-SDK</string>
     <string name="action_settings">Settings</string>
-    <!-- Strings used for fragments for navigation -->
-    <string name="first_fragment_label">First Fragment</string>
-    <string name="second_fragment_label">Second Fragment</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
 
     <string name="hello_first_fragment">Hello first fragment</string>
-    <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="user_address">User Address</string>
+    <string name="sign_message">Sign Message</string>
+    <string name="test_sign_message">Test sign message</string>
 </resources>

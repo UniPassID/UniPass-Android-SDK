@@ -15,6 +15,7 @@
         android:theme="@style/Theme.UniPassAndroidSDK"
         tools:targetApi="31">
         <activity
+            android:launchMode="singleTop"
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
@@ -31,7 +32,10 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="upauth" />
+                <data android:scheme="unipassapp"
+                      android:host="com.unipass.wallet"
+                      android:pathPattern="/*"
+                      android:pathPrefix="/redirect" />
             </intent-filter>
 
         </activity>
