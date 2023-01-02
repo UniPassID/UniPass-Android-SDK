@@ -1,7 +1,18 @@
 package com.unipass.core.types
 
+import com.google.gson.annotations.SerializedName
+
+enum class SignType(val value: String) {
+    @SerializedName("PersonalSign")
+    PersonalSign("PersonalSign"),
+
+    @SerializedName("SignTypedData")
+    SignTypedData("SignTypedData"),
+}
+
+
 data class SignInput (
-    var address: String,
-    var signType: String? = null,
-    var message: String? = null
+    val from: String,
+    val type: SignType,
+    val msg: String
 )

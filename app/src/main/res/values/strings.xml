@@ -8,4 +8,6 @@
     <string name="user_address">User Address</string>
     <string name="sign_message">Sign Message</string>
     <string name="test_sign_message">Test sign message</string>
+    <string name="signature">signature</string>
+
 </resources>

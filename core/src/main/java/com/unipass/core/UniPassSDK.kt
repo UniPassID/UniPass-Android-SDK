@@ -6,18 +6,18 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import com.google.gson.GsonBuilder
 import com.unipass.core.types.*
-import java.util.*
-import java8.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletableFuture
 
 class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     private val gson = GsonBuilder().disableHtmlEscaping().create()
 
-    private val initParams: Map<String, Any>
+    private val appSettings: Map<String, Any>
     private val context: Context
 
     private var userInfo: UserInfo? = null
     private var walletUrl: Uri
+    private var redirectUrl: String? = ""
 
     private lateinit var currentAction: OutputType
 
@@ -29,24 +29,33 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
 
     init {
-        val initParams = mutableMapOf(
-            "network" to uniPassSDKOptions.network.name.lowercase(Locale.ROOT)
+        appSettings = mutableMapOf(
+            "chain" to "polygon",
+            "theme" to "dark",
         )
-        if (uniPassSDKOptions.redirectUrl != null) initParams["redirectUrl"] =
+        if(uniPassSDKOptions.appSettings != null){
+            if(uniPassSDKOptions.appSettings!!.chain != null) appSettings["chain"] =
+                uniPassSDKOptions.appSettings!!.chain!!.toString()
+            if(uniPassSDKOptions.appSettings!!.theme != null) appSettings["theme"] =
+                uniPassSDKOptions.appSettings!!.theme!!.toString()
+            if(uniPassSDKOptions.appSettings!!.appName != null) appSettings["appName"] = uniPassSDKOptions.appSettings!!.appName!!
+            if(uniPassSDKOptions.appSettings!!.appIcon != null) appSettings["appIcon"] = uniPassSDKOptions.appSettings!!.appIcon!!
+        }
+
+        if (uniPassSDKOptions.redirectUrl != null) redirectUrl =
             uniPassSDKOptions.redirectUrl.toString()
 
         if (uniPassSDKOptions.walletUrl == null || uniPassSDKOptions.walletUrl?.isEmpty() == true) {
-            if (uniPassSDKOptions.network == Network.MAINNET) {
-//                uniPassSDKOptions.walletUrl = "https://wallet.unipass.id"
-                uniPassSDKOptions.walletUrl = "http://localhost:1901/"
+            if (uniPassSDKOptions.env == Environment.MAINNET) {
+                uniPassSDKOptions.walletUrl = "https://wallet.unipass.id"
+                throw Exception("not supported now")
             } else {
 //                uniPassSDKOptions.walletUrl = "https://testnet.wallet.unipass.id"
-                uniPassSDKOptions.walletUrl = "http://localhost:1901/"
+                uniPassSDKOptions.walletUrl = "https://t.wallet.unipass.vip"
             }
         }
         walletUrl = Uri.parse(uniPassSDKOptions.walletUrl)
 
-        this.initParams = initParams
         this.context = uniPassSDKOptions.context
 
         // load session from local storage
@@ -71,9 +80,10 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         currentAction = outputType
 
         val paramMap = mapOf(
-            "init" to initParams,
-            "params" to params
-        )
+            "type" to outputType,
+            "payload" to params,
+            "appSetting" to appSettings,
+            )
         val validParams = paramMap.filterValues { it != null }
         val hash = gson.toJson(validParams).toByteArray(Charsets.UTF_8).toBase64URLString()
 
@@ -81,9 +91,11 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             .encodedAuthority(walletUrl.encodedAuthority)
             .encodedPath(walletUrl.encodedPath)
             .appendPath(path)
-            .appendQueryParameter("redirectUrl", initParams["redirectUrl"].toString())
+            .appendQueryParameter("redirectUrl", redirectUrl)
             .fragment(hash)
             .build()
+
+        println("go to url: $url")
 
         val defaultBrowser = context.getDefaultBrowser()
         val customTabsBrowsers = context.getCustomTabsBrowsers()
@@ -127,31 +139,41 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             BaseOutput::class.java
         )
 
-        if (output.error?.isNotBlank() == true) {
+        if (output.errorCode != null) {
             completeFutureWithException(
                 UnKnownException(
-                    output.error ?: "Something went wrong"
+                    output.errorMsg ?: "Something went wrong"
                 )
             )
         }
 
+
         when (output.type) {
             OutputType.Login -> {
-                output = gson.fromJson(
+                val loginOutput = gson.fromJson(
                     decodeBase64URLString(hash).toString(Charsets.UTF_8),
                     LoginOutput::class.java
-                )
-                SharedPreferenceUtil.saveItem(context, SharedPreferenceUtil.SESSION_KEY, gson.toJson(output))
-                loginCompletableFuture.complete(output as LoginOutput)
+                ) as LoginOutput
+                SharedPreferenceUtil.saveItem(context, SharedPreferenceUtil.SESSION_KEY, gson.toJson(loginOutput.userInfo))
+                this.loadSession()
+                loginCompletableFuture.complete(loginOutput)
             }
             OutputType.Logout -> {
                 logoutCompletableFuture.complete(null)
             }
             OutputType.SignMessage -> {
-                signMessageCompletableFuture.complete(output as SignOutput)
+                val signMessageOutput = gson.fromJson<SignOutput>(
+                    decodeBase64URLString(hash).toString(Charsets.UTF_8),
+                    SignOutput::class.java
+                )
+                signMessageCompletableFuture.complete(signMessageOutput)
             }
             OutputType.SendTransaction -> {
-                sendTransactionCompletableFuture.complete(output as SendTransactionOutput)
+                val sendTransactionOutput = gson.fromJson<SendTransactionOutput>(
+                    decodeBase64URLString(hash).toString(Charsets.UTF_8),
+                    SendTransactionOutput::class.java
+                )
+                sendTransactionCompletableFuture.complete(sendTransactionOutput)
             }
             else -> {}
         }
@@ -174,25 +196,30 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     }
 
     fun signMessage(signInput: SignInput): CompletableFuture<SignOutput> {
-//        val params = mutableMapOf<string, any>(
-//            "message" to signInput.message
-//        )
-//        val testp = mutableMapOf<string, any>()
-        request("sign-message", OutputType.SignMessage)
+        val params = mutableMapOf<String, Any>(
+            "from" to signInput.from,
+            "type" to signInput.type.toString(),
+            "msg" to signInput.msg,
+        )
+        request("sign-message", OutputType.SignMessage, params)
 
         signMessageCompletableFuture = CompletableFuture()
         return signMessageCompletableFuture
     }
 
     fun signTypedData(signInput: SignInput): CompletableFuture<SignOutput> {
-        request("sign-message", OutputType.SignMessage)
-
-        signMessageCompletableFuture = CompletableFuture()
-        return signMessageCompletableFuture
+        return this.signMessage(signInput)
     }
 
     fun sendTransaction(sendTransactionInput: SendTransactionInput): CompletableFuture<SendTransactionOutput> {
-        request("send-transaction", OutputType.SignMessage)
+
+        val params = mutableMapOf<String, Any>(
+            "from" to sendTransactionInput.from,
+            "to" to sendTransactionInput.to,
+            "value" to sendTransactionInput.value.toString(),
+            "data" to sendTransactionInput.data.toString()
+        )
+        request("send-transaction", OutputType.SendTransaction, params)
 
         sendTransactionCompletableFuture = CompletableFuture()
         return sendTransactionCompletableFuture

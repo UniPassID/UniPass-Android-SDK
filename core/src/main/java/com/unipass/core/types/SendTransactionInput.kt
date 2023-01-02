@@ -1,13 +1,9 @@
 package com.unipass.core.types
 
 
-data class Transaction (
+data class SendTransactionInput (
         val from: String,
         val to: String,
-        val value: String? = "0x0",
+        val value: String? = "0x",
         val data: String? = "0x",
         )
-
-data class SendTransactionInput (
-    val transactionList: List<Transaction>
-)

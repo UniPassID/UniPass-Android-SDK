@@ -3,18 +3,18 @@ package com.unipass.core.types
 import com.google.gson.annotations.SerializedName
 
 enum class OutputType {
-    @SerializedName("login")
+    @SerializedName("UP_LOGIN")
     Login,
 
-    @SerializedName("logout")
+    @SerializedName("UP_LOGOUT")
     Logout,
 
-    @SerializedName("sign_message")
+    @SerializedName("UP_SIGN_MESSAGE")
     SignMessage,
 
-    @SerializedName("send_transaction")
+    @SerializedName("UP_TRANSACTION")
     SendTransaction
 }
 
 
-open class BaseOutput(val type: OutputType?, val error: String? = null)
+open class BaseOutput(val type: OutputType?, val errorCode: Int? = null, val errorMsg: String? = null)
