@@ -48,10 +48,8 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         if (uniPassSDKOptions.walletUrl == null || uniPassSDKOptions.walletUrl?.isEmpty() == true) {
             if (uniPassSDKOptions.env == Environment.MAINNET) {
                 uniPassSDKOptions.walletUrl = "https://wallet.unipass.id"
-                throw Exception("not supported now")
             } else {
-//                uniPassSDKOptions.walletUrl = "https://testnet.wallet.unipass.id"
-                uniPassSDKOptions.walletUrl = "https://t.wallet.unipass.vip"
+                uniPassSDKOptions.walletUrl = "https://testnet.wallet.unipass.id"
             }
         }
         walletUrl = Uri.parse(uniPassSDKOptions.walletUrl)
