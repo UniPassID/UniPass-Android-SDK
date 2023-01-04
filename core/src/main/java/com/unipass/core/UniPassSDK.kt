@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.browser.customtabs.CustomTabsIntent
 import com.google.gson.GsonBuilder
 import com.unipass.core.types.*
-import java.util.concurrent.CompletableFuture
 
 class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
@@ -18,15 +17,12 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     private var userInfo: UserInfo? = null
     private var walletUrl: Uri
     private var redirectUrl: String? = ""
-
     private lateinit var currentAction: OutputType
 
-    private var loginCompletableFuture: CompletableFuture<LoginOutput> = CompletableFuture()
-    private var logoutCompletableFuture: CompletableFuture<LogoutOutput> = CompletableFuture()
-    private var signMessageCompletableFuture: CompletableFuture<SignOutput> = CompletableFuture()
-    private var sendTransactionCompletableFuture: CompletableFuture<SendTransactionOutput> =
-        CompletableFuture()
-
+    private lateinit var loginCallBack: UnipassCallBack<LoginOutput>
+    private lateinit var logoutCallBack: UnipassCallBack<Void>
+    private lateinit var signMsgCallBack: UnipassCallBack<SignOutput>
+    private lateinit var sendTransactionCallBack: UnipassCallBack<SendTransactionOutput>
 
     init {
         appSettings = mutableMapOf(
@@ -114,12 +110,10 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     private fun completeFutureWithException(exception: Exception) {
         when (currentAction) {
-            OutputType.Login -> loginCompletableFuture.completeExceptionally(exception)
-            OutputType.Logout -> logoutCompletableFuture.completeExceptionally(exception)
-            OutputType.SignMessage -> signMessageCompletableFuture.completeExceptionally(exception)
-            OutputType.SendTransaction -> sendTransactionCompletableFuture.completeExceptionally(
-                exception
-            )
+            OutputType.Login -> loginCallBack.failure(exception)
+            OutputType.Logout -> logoutCallBack.failure(exception)
+            OutputType.SignMessage -> signMsgCallBack.failure(exception)
+            OutputType.SendTransaction -> sendTransactionCallBack.failure(exception)
         }
     }
 
@@ -145,7 +139,6 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             )
         }
 
-
         when (output.type) {
             OutputType.Login -> {
                 val loginOutput = gson.fromJson(
@@ -154,62 +147,53 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
                 ) as LoginOutput
                 SharedPreferenceUtil.saveItem(context, SharedPreferenceUtil.SESSION_KEY, gson.toJson(loginOutput.userInfo))
                 this.loadSession()
-                loginCompletableFuture.complete(loginOutput)
+                loginCallBack.success(loginOutput)
             }
             OutputType.Logout -> {
-                logoutCompletableFuture.complete(null)
+                logoutCallBack.success(null)
             }
             OutputType.SignMessage -> {
                 val signMessageOutput = gson.fromJson<SignOutput>(
                     decodeBase64URLString(hash).toString(Charsets.UTF_8),
                     SignOutput::class.java
                 )
-                signMessageCompletableFuture.complete(signMessageOutput)
+                signMsgCallBack.success(signMessageOutput)
             }
             OutputType.SendTransaction -> {
                 val sendTransactionOutput = gson.fromJson<SendTransactionOutput>(
                     decodeBase64URLString(hash).toString(Charsets.UTF_8),
                     SendTransactionOutput::class.java
                 )
-                sendTransactionCompletableFuture.complete(sendTransactionOutput)
+                sendTransactionCallBack.success(sendTransactionOutput)
             }
             else -> {}
         }
     }
 
-    fun login(): CompletableFuture<LoginOutput> {
+    fun login(callBack: UnipassCallBack<LoginOutput>) {
         request("connect", OutputType.Login)
-
-        loginCompletableFuture = CompletableFuture()
-        return loginCompletableFuture
+        loginCallBack = callBack
     }
 
-    fun logout(): CompletableFuture<LogoutOutput> {
+    fun logout(callBack: UnipassCallBack<Void>) {
         // delete local storage
         SharedPreferenceUtil.deleteItem(context, SharedPreferenceUtil.SESSION_KEY)
 
         request("logout", OutputType.Logout)
-        logoutCompletableFuture = CompletableFuture()
-        return logoutCompletableFuture
+        logoutCallBack = callBack
     }
 
-    fun signMessage(signInput: SignInput): CompletableFuture<SignOutput> {
+    fun signMessage(signInput: SignInput, callBack: UnipassCallBack<SignOutput>) {
         val params = mutableMapOf<String, Any>(
             "from" to signInput.from,
             "type" to signInput.type.toString(),
             "msg" to signInput.msg,
         )
         request("sign-message", OutputType.SignMessage, params)
-
-        signMessageCompletableFuture = CompletableFuture()
-        return signMessageCompletableFuture
+        signMsgCallBack = callBack
     }
 
-    fun signTypedData(signInput: SignInput): CompletableFuture<SignOutput> {
-        return this.signMessage(signInput)
-    }
-
-    fun sendTransaction(sendTransactionInput: SendTransactionInput): CompletableFuture<SendTransactionOutput> {
+    fun sendTransaction(sendTransactionInput: SendTransactionInput, callBack: UnipassCallBack<SendTransactionOutput>) {
 
         val params = mutableMapOf<String, Any>(
             "from" to sendTransactionInput.from,
@@ -219,8 +203,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         )
         request("send-transaction", OutputType.SendTransaction, params)
 
-        sendTransactionCompletableFuture = CompletableFuture()
-        return sendTransactionCompletableFuture
+        sendTransactionCallBack = callBack
     }
 
     fun getUserInfo(): UserInfo {
