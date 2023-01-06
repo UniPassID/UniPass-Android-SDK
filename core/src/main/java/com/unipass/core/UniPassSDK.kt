@@ -13,7 +13,6 @@ import com.unipass.core.types.*
 class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     private val gson = GsonBuilder().disableHtmlEscaping().create()
-
     private val appSettings: MutableMap<String, Any>
     private val context: Context
     private val activity: AppCompatActivity
@@ -78,8 +77,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     private fun request(
         path: String,
         outputType: OutputType,
-        params: Map<String, Any>? = null,
-        redirectUrl: String? = null
+        params: Map<String, Any>? = null
     ) {
         currentAction = outputType
         val paramMap = mapOf(
