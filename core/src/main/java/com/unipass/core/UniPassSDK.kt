@@ -77,8 +77,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     private fun request(
         path: String,
         outputType: OutputType,
-        params: Map<String, Any>? = null,
-        redirectUrl: String? = null
+        params: Map<String, Any>? = null
     ) {
         currentAction = outputType
         val paramMap = mapOf(
