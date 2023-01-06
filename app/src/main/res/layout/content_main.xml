@@ -5,89 +5,157 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
+    
     <TextView
         android:id="@+id/userAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/user_address"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.1" />
 
     <Button
-        android:id="@+id/button_first"
-        android:layout_width="wrap_content"
+        android:id="@+id/button_login"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="10dp"
         android:text="@string/login"
-        android:layout_marginLeft="56dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/userAddress"
-         />
-
-    <Button
-        android:id="@+id/button_second"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="56dp"
-        android:text="@string/logout"
-        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/userAddress" />
 
     <EditText
         android:id="@+id/message_to_sign"
         android:layout_width="250dp"
-        android:layout_height="80dp"
-        android:layout_marginTop="36dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="10dp"
         android:text="@string/test_sign_message"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_second" />
+        app:layout_constraintTop_toBottomOf="@id/button_login" />
 
     <Button
         android:id="@+id/button_sign_message"
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="10dp"
         android:text="@string/sign_message"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.464"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/message_to_sign" />
 
     <EditText
         android:id="@+id/personal_sign_signature"
         android:layout_width="250dp"
-        android:layout_height="80dp"
-        android:layout_marginTop="172dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="10dp"
         android:text="personal sign signature"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_second" />
+        app:layout_constraintTop_toBottomOf="@id/button_sign_message" />
 
     <Button
         android:id="@+id/button_send_transaction"
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="160dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="80dp"
         android:text="send transaction"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/message_to_sign" />
+        app:layout_constraintTop_toBottomOf="@id/personal_sign_signature" />
 
     <TextView
         android:id="@+id/transaction_hash"
-        android:layout_width="wrap_content"
+        android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:text="transaction hash"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="80dp"
+        android:text="Transaction Hash"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.664" />
+        app:layout_constraintTop_toBottomOf="@id/button_send_transaction" />
 
+    <RadioGroup
+        android:id="@+id/chain_type_group"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="20dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transaction_hash" >
+        <TextView
+            android:id="@+id/radio_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set chain type:"
+            />
+        <RadioButton
+            android:id="@+id/radio_eth"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ETH" />
+        <RadioButton
+            android:id="@+id/radio_plg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Polygon" />
+        <RadioButton
+            android:id="@+id/radio_bsc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="BSC" />
+        <RadioButton
+            android:id="@+id/radio_rangers"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rangers" />
+        <RadioButton
+            android:id="@+id/radio_scroll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Scroll" />
+    </RadioGroup>
 
+    <RadioGroup
+        android:id="@+id/theme_group"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="80dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/chain_type_group">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set App theme:"
+            />
+        <RadioButton
+            android:id="@+id/radio_dark"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="dark"></RadioButton>
+        <RadioButton
+            android:id="@+id/radio_light"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="light"></RadioButton>
+        <RadioButton
+            android:id="@+id/radio_cassava"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="cassava"></RadioButton>
+    </RadioGroup>
+
+    <Button
+        android:id="@+id/button_logout"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginStart="80dp"
+        android:text="LOGOUT"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/theme_group" />
 </androidx.constraintlayout.widget.ConstraintLayout>
