@@ -13,12 +13,10 @@ import com.unipass.core.types.*
 class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     private val gson = GsonBuilder().disableHtmlEscaping().create()
-
     private val appSettings: Map<String, Any>
     private val context: Context
     private val activity: AppCompatActivity
     private var resultLauncher: ActivityResultLauncher<Intent>
-
     private var userInfo: UserInfo? = null
     private var walletUrl: Uri
     private var redirectUrl: String? = ""
@@ -59,8 +57,6 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         this.activity = uniPassSDKOptions.activity
 
         resultLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            println("resultLauncher before resultLauncher")
-            println(it.data?.data)
             setResultUrl(it.data?.data)
         }
 
