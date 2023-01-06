@@ -215,6 +215,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             "data" to sendTransactionInput.data.toString()
         )
         request("send-transaction", OutputType.SendTransaction, params)
+<<<<<<< HEAD
     }
 
     fun setChainType(chain: ChainType) {
@@ -223,6 +224,8 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     fun setTheme(theme: UniPassTheme) {
         appSettings["theme"] = theme
+=======
+>>>>>>> main
     }
 
     fun getUserInfo(): UserInfo {
