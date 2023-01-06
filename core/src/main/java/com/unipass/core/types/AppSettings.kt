@@ -10,7 +10,8 @@ enum class ChainType(val value: String) {
 
 enum class UniPassTheme(val value: String){
     dark("dark"),
-    light("light")
+    light("light"),
+    cassava("cassava"),
 }
 
 

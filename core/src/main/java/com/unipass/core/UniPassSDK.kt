@@ -11,7 +11,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     private val gson = GsonBuilder().disableHtmlEscaping().create()
 
-    private val appSettings: Map<String, Any>
+    private val appSettings: MutableMap<String, Any>
     private val context: Context
 
     private var userInfo: UserInfo? = null
@@ -204,6 +204,14 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         request("send-transaction", OutputType.SendTransaction, params)
 
         sendTransactionCallBack = callBack
+    }
+
+    fun setChainType(chain: ChainType) {
+        appSettings["chain"] = chain
+    }
+
+    fun setTheme(theme: UniPassTheme) {
+        appSettings["theme"] = theme
     }
 
     fun getUserInfo(): UserInfo {
