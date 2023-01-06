@@ -39,7 +39,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:scheme="unipassapptest"
+                    android:scheme="unipassapp"
                     android:host="com.unipass.wallet"
                     android:pathPattern="/*"
                     android:pathPrefix="/redirect" />

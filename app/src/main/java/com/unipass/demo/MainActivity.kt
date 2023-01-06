@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
             UniPassSDKOptions(
                 context = this,
                 activity = this,
-                redirectUrl = Uri.parse("unipassapptest://com.unipass.wallet/redirect"),
+                redirectUrl = Uri.parse("unipassapp://com.unipass.wallet/redirect"),
                 env = Environment.TESTNET
             )
         )
