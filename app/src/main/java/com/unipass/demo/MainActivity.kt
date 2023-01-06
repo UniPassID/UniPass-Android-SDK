@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
 import android.widget.EditText
+import android.widget.RadioGroup
 import android.widget.TextView
 import android.widget.Toast
 import com.unipass.core.UniPassSDK
@@ -35,10 +36,10 @@ class MainActivity : AppCompatActivity() {
             userAddressTextV.text = unipassInstance.getAddress()
         }
 
-        val loginBtn = findViewById<Button>(R.id.button_first)
+        val loginBtn = findViewById<Button>(R.id.button_login)
         loginBtn.setOnClickListener { loginIn() }
 
-        val logoutBtn = findViewById<Button>(R.id.button_second)
+        val logoutBtn = findViewById<Button>(R.id.button_logout)
         logoutBtn.setOnClickListener { loginOut() }
 
         val signMsgBtn = findViewById<Button>(R.id.button_sign_message)
@@ -46,6 +47,26 @@ class MainActivity : AppCompatActivity() {
 
         val sendTransactionBtn = findViewById<Button>(R.id.button_send_transaction)
         sendTransactionBtn.setOnClickListener { sendTransaction() }
+
+        val chainTypeGrp = findViewById<RadioGroup>(R.id.chain_type_group)
+        chainTypeGrp.setOnCheckedChangeListener { _, i ->
+            when(i) {
+                R.id.radio_eth -> unipassInstance.setChainType(ChainType.eth)
+                R.id.radio_plg -> unipassInstance.setChainType(ChainType.polygon)
+                R.id.radio_bsc -> unipassInstance.setChainType(ChainType.bsc)
+                R.id.radio_rangers -> unipassInstance.setChainType(ChainType.rangers)
+                R.id.radio_scroll -> unipassInstance.setChainType(ChainType.scroll)
+            }
+        }
+
+        val themeGrp = findViewById<RadioGroup>(R.id.theme_group)
+        themeGrp.setOnCheckedChangeListener { _, i ->
+            when(i) {
+                R.id.radio_dark -> unipassInstance.setTheme(UniPassTheme.dark)
+                R.id.radio_light -> unipassInstance.setTheme(UniPassTheme.light)
+                R.id.radio_cassava -> unipassInstance.setTheme(UniPassTheme.cassava)
+            }
+        }
     }
 
     fun loginIn() {
@@ -107,7 +128,7 @@ class MainActivity : AppCompatActivity() {
         if (unipassInstance.isLogin()) {
             var transactionInput = SendTransactionInput(unipassInstance.getAddress(),
                 "0x7b5Bd7c9E3A0D0Ef50A9b3aCF5d1AcD58C3590d1",
-                "0x" + toWei("0.001", Convert.Unit.ETHER).toBigIntegerExact().toString(16)
+                "0x" + toWei("0.00001", Convert.Unit.ETHER).toBigIntegerExact().toString(16)
             )
             unipassInstance.sendTransaction(transactionInput, object : UnipassCallBack<SendTransactionOutput> {
                 override fun success(output: SendTransactionOutput?) {

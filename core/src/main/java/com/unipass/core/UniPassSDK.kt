@@ -13,7 +13,7 @@ import com.unipass.core.types.*
 class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     private val gson = GsonBuilder().disableHtmlEscaping().create()
-    private val appSettings: Map<String, Any>
+    private val appSettings: MutableMap<String, Any>
     private val context: Context
     private val activity: AppCompatActivity
     private var resultLauncher: ActivityResultLauncher<Intent>
@@ -213,6 +213,16 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             "data" to sendTransactionInput.data.toString()
         )
         request("send-transaction", OutputType.SendTransaction, params)
+
+        sendTransactionCallBack = callBack
+    }
+
+    fun setChainType(chain: ChainType) {
+        appSettings["chain"] = chain
+    }
+
+    fun setTheme(theme: UniPassTheme) {
+        appSettings["theme"] = theme
     }
 
     fun getUserInfo(): UserInfo {
