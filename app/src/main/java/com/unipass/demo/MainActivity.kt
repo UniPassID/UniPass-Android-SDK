@@ -1,6 +1,5 @@
 package com.unipass.demo
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -24,13 +23,12 @@ class MainActivity : AppCompatActivity() {
 
         unipassInstance = UniPassSDK(
             UniPassSDKOptions(
-                context = this!!,
-                redirectUrl = Uri.parse("unipassapp://com.unipass.wallet/redirect"),
+                context = this,
+                activity = this,
+                redirectUrl = Uri.parse("unipassapptest://com.unipass.wallet/redirect"),
                 env = Environment.TESTNET
             )
         )
-
-        unipassInstance.setResultUrl(intent.data)
 
         if(unipassInstance.isLogin()){
             val userAddressTextV = findViewById<TextView>(R.id.userAddress)
@@ -48,11 +46,6 @@ class MainActivity : AppCompatActivity() {
 
         val sendTransactionBtn = findViewById<Button>(R.id.button_send_transaction)
         sendTransactionBtn.setOnClickListener { sendTransaction() }
-    }
-
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-        unipassInstance.setResultUrl(intent?.data)
     }
 
     fun loginIn() {

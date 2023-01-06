@@ -3,6 +3,9 @@ package com.unipass.core
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import com.google.gson.GsonBuilder
 import com.unipass.core.types.*
@@ -13,12 +16,14 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     private val appSettings: Map<String, Any>
     private val context: Context
+    private val activity: AppCompatActivity
+    private var resultLauncher: ActivityResultLauncher<Intent>
 
     private var userInfo: UserInfo? = null
     private var walletUrl: Uri
     private var redirectUrl: String? = ""
-    private lateinit var currentAction: OutputType
 
+    private lateinit var currentAction: OutputType
     private lateinit var loginCallBack: UnipassCallBack<LoginOutput>
     private lateinit var logoutCallBack: UnipassCallBack<Void>
     private lateinit var signMsgCallBack: UnipassCallBack<SignOutput>
@@ -51,6 +56,13 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         walletUrl = Uri.parse(uniPassSDKOptions.walletUrl)
 
         this.context = uniPassSDKOptions.context
+        this.activity = uniPassSDKOptions.activity
+
+        resultLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            println("resultLauncher before resultLauncher")
+            println(it.data?.data)
+            setResultUrl(it.data?.data)
+        }
 
         // load session from local storage
         loadSession()
@@ -69,10 +81,10 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     private fun request(
         path: String,
         outputType: OutputType,
-        params: Map<String, Any>? = null
+        params: Map<String, Any>? = null,
+        redirectUrl: String? = null
     ) {
         currentAction = outputType
-
         val paramMap = mapOf(
             "type" to outputType,
             "payload" to params,
@@ -120,7 +132,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     /**
      * receive redirect url params and set result for request
      */
-    fun setResultUrl(uri: Uri?) {
+    private fun setResultUrl(uri: Uri?) {
         val hash = uri?.fragment ?: return
         val error = uri.getQueryParameter("error")
         if (error != null) {
@@ -171,30 +183,34 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     }
 
     fun login(callBack: UnipassCallBack<LoginOutput>) {
-        request("connect", OutputType.Login)
         loginCallBack = callBack
+        resultLauncher.launch(Intent(context, UniPassActivity::class.java))
+        request("connect", OutputType.Login)
     }
 
     fun logout(callBack: UnipassCallBack<Void>) {
         // delete local storage
         SharedPreferenceUtil.deleteItem(context, SharedPreferenceUtil.SESSION_KEY)
-
-        request("logout", OutputType.Logout)
         logoutCallBack = callBack
+        resultLauncher.launch(Intent(context, UniPassActivity::class.java))
+        request("logout", OutputType.Logout)
+
     }
 
-    fun signMessage(signInput: SignInput, callBack: UnipassCallBack<SignOutput>) {
+    fun signMessage(signInput: SignInput, callBack: UnipassCallBack<SignOutput>, redirectUrl: Uri? = null) {
+        signMsgCallBack = callBack
+        resultLauncher.launch(Intent(context, UniPassActivity::class.java))
         val params = mutableMapOf<String, Any>(
             "from" to signInput.from,
             "type" to signInput.type.toString(),
             "msg" to signInput.msg,
         )
         request("sign-message", OutputType.SignMessage, params)
-        signMsgCallBack = callBack
     }
 
     fun sendTransaction(sendTransactionInput: SendTransactionInput, callBack: UnipassCallBack<SendTransactionOutput>) {
-
+        sendTransactionCallBack = callBack
+        resultLauncher.launch(Intent(context, UniPassActivity::class.java))
         val params = mutableMapOf<String, Any>(
             "from" to sendTransactionInput.from,
             "to" to sendTransactionInput.to,
@@ -202,8 +218,6 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             "data" to sendTransactionInput.data.toString()
         )
         request("send-transaction", OutputType.SendTransaction, params)
-
-        sendTransactionCallBack = callBack
     }
 
     fun getUserInfo(): UserInfo {
