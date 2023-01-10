@@ -13,13 +13,17 @@ import com.unipass.core.types.*
 class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     private val gson = GsonBuilder().disableHtmlEscaping().create()
-    private val appSettings: MutableMap<String, Any>
+    private val appSettings: MutableMap<String, Any> = mutableMapOf(
+        "chain" to "polygon",
+        "theme" to "dark",
+    )
     private val context: Context
     private val activity: AppCompatActivity
     private var resultLauncher: ActivityResultLauncher<Intent>
     private var userInfo: UserInfo? = null
     private var walletUrl: Uri
     private var redirectUrl: String? = ""
+    private var supportLoginType: ConnectType? = ConnectType.BOTH
 
     private lateinit var currentAction: OutputType
     private lateinit var loginCallBack: UnipassCallBack<LoginOutput>
@@ -28,10 +32,6 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     private lateinit var sendTransactionCallBack: UnipassCallBack<SendTransactionOutput>
 
     init {
-        appSettings = mutableMapOf(
-            "chain" to "polygon",
-            "theme" to "dark",
-        )
         if(uniPassSDKOptions.appSettings != null){
             if(uniPassSDKOptions.appSettings!!.chain != null) appSettings["chain"] =
                 uniPassSDKOptions.appSettings!!.chain!!.toString()
@@ -87,16 +87,19 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             )
         val validParams = paramMap.filterValues { it != null }
         val hash = gson.toJson(validParams).toByteArray(Charsets.UTF_8).toBase64URLString()
-
-        val url = Uri.Builder().scheme(walletUrl.scheme)
+        val uri = Uri.Builder().scheme(walletUrl.scheme)
             .encodedAuthority(walletUrl.encodedAuthority)
             .encodedPath(walletUrl.encodedPath)
             .appendPath(path)
-            .appendQueryParameter("redirectUrl", redirectUrl)
-            .fragment(hash)
-            .build()
 
-        println("go to url: $url")
+        if (outputType == OutputType.Login) {
+            uri.appendQueryParameter("connectType", supportLoginType.toString().lowercase())
+        }
+
+        uri.appendQueryParameter("redirectUrl", redirectUrl)
+            .fragment(hash)
+
+        val url = uri.build()
 
         val defaultBrowser = context.getDefaultBrowser()
         val customTabsBrowsers = context.getCustomTabsBrowsers()
@@ -181,6 +184,11 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         loginCallBack = callBack
         resultLauncher.launch(Intent(context, UniPassActivity::class.java))
         request("connect", OutputType.Login)
+    }
+
+    fun login(connectType: ConnectType, callBack: UnipassCallBack<LoginOutput>) {
+        supportLoginType = connectType
+        login(callBack)
     }
 
     fun logout(callBack: UnipassCallBack<Void>) {
