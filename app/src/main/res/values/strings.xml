@@ -7,7 +7,7 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="user_address">User Address</string>
     <string name="sign_message">Sign Message</string>
-    <string name="test_sign_message">Test sign message</string>
+    <string name="test_sign_message">Sign message 签名消息</string>
     <string name="signature">signature</string>
 
 </resources>

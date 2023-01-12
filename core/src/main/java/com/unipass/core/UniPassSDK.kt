@@ -86,7 +86,9 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             "appSetting" to appSettings,
             )
         val validParams = paramMap.filterValues { it != null }
-        val hash = gson.toJson(validParams).toByteArray(Charsets.UTF_8).toBase64URLString()
+        var hashByteArray = gson.toJson(validParams).toByteArray(Charsets.UTF_8)
+        var hash = hashByteArray.toBase64URLString()
+
         val uri = Uri.Builder().scheme(walletUrl.scheme)
             .encodedAuthority(walletUrl.encodedAuthority)
             .encodedPath(walletUrl.encodedPath)
