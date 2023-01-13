@@ -4,6 +4,7 @@ This library allows you to integrate UniPass Wallet into your Android app.
 
 | Version | Last updated   | UniPass Wallet Entry URL        | UPgrade Instruction                                                                    |
 | -------- | ---------- | ---------------------------------- | -------------------------------------------------------------------------------------- |
+| v0.0.6   | 2023.01.13 | https://testnet.wallet.unipass.id/ | Add overload API login, allow connectType for login . Code optimizing                  |
 | v0.0.5   | 2023.01.09 | https://testnet.wallet.unipass.id/ | Add UniPassActivity , remove requirements for singleTop launchMode . UniPassSDKOptions adds parameter: activity |
 | v0.0.3   | 2023.01.04 | https://testnet.wallet.unipass.id/ | Add Connect / Transfer / Sign Message / Logout support                                 |
 
@@ -216,12 +217,30 @@ enum class OutputType {
     SendTransaction
 }
 
+enum class ConnectType(value: String) {
+    GOOGLE("google"),
+
+    EMAIL("email"),
+
+    BOTH("both"),
+}
 ```
 
 ## Sample Code
 
 ```java
 unipassInstance.login(object : UnipassCallBack<LoginOutput> {
+    override fun success(output: LoginOutput?) {
+        Log.d("Unipass Login", "success")
+    }
+
+    override fun failure(error: Exception) {
+        Log.d("Unipass Login", error.message ?: "Something went wrong")
+    }
+})
+// Or you can use an overloaded login so that users connect at the type you choose
+// connectType default is BOTH
+unipassInstance.login(ConnectType.GOOGLE, object : UnipassCallBack<LoginOutput> {
     override fun success(output: LoginOutput?) {
         Log.d("Unipass Login", "success")
     }
