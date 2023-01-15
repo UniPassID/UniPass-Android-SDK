@@ -133,6 +133,12 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
      * receive redirect url params and set result for request
      */
     private fun setResultUrl(uri: Uri?) {
+        if (uri == null) {
+            completeFutureWithException(
+                UnKnownException("User interrupted")
+            )
+            return
+        }
         val hash = uri?.fragment ?: return
         val error = uri.getQueryParameter("error")
         if (error != null) {
