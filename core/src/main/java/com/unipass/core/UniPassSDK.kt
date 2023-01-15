@@ -134,15 +134,14 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
      */
     private fun setResultUrl(uri: Uri?) {
         if (uri == null) {
-            completeFutureWithException(
-                UnKnownException("User interrupted")
-            )
+            completeFutureWithException(UserInterruptedException())
             return
         }
         val hash = uri?.fragment ?: return
         val error = uri.getQueryParameter("error")
         if (error != null) {
             completeFutureWithException(UnKnownException(error))
+            return
         }
         var  output = gson.fromJson(
             decodeBase64URLString(hash).toString(Charsets.UTF_8),
@@ -150,11 +149,19 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         )
 
         if (output.errorCode != null) {
-            completeFutureWithException(
-                UnKnownException(
-                    output.errorMsg ?: "Something went wrong"
-                )
-            )
+            when (output.errorCode) {
+                401 -> {
+                    completeFutureWithException(UserCancelledException())
+                }
+                else -> {
+                    completeFutureWithException(
+                        UnKnownException(
+                            output.errorMsg ?: "Something went wrong"
+                        )
+                    )
+                }
+            }
+            return
         }
 
         when (output.type) {
