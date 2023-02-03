@@ -206,13 +206,16 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         login(callBack)
     }
 
-    fun logout(callBack: UnipassCallBack<Void>) {
+    fun logout(callBack: UnipassCallBack<Void>, deep: Boolean = true) {
         // delete local storage
         SharedPreferenceUtil.deleteItem(context, SharedPreferenceUtil.SESSION_KEY)
         logoutCallBack = callBack
-        resultLauncher.launch(Intent(context, UniPassActivity::class.java))
-        request("logout", OutputType.Logout)
-
+        if (deep) {
+            resultLauncher.launch(Intent(context, UniPassActivity::class.java))
+            request("logout", OutputType.Logout)
+        } else {
+            logoutCallBack.success(null)
+        }
     }
 
     fun signMessage(signInput: SignInput, callBack: UnipassCallBack<SignOutput>, redirectUrl: Uri? = null) {
