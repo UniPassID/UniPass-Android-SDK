@@ -27,6 +27,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/userAddress" />
 
+    <Button
+        android:id="@+id/button_login_auth"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:layout_marginTop="10dp"
+        android:text="@string/loginAuth"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/button_login" />
+
     <EditText
         android:id="@+id/message_to_sign"
         android:layout_width="250dp"
@@ -35,7 +45,7 @@
         android:layout_marginTop="10dp"
         android:text="@string/test_sign_message"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/button_login" />
+        app:layout_constraintTop_toBottomOf="@id/button_login_auth" />
 
     <Button
         android:id="@+id/button_sign_message"

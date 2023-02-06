@@ -39,6 +39,9 @@ class MainActivity : AppCompatActivity() {
         val loginBtn = findViewById<Button>(R.id.button_login)
         loginBtn.setOnClickListener { loginIn() }
 
+        val loginAuthBtn = findViewById<Button>(R.id.button_login_auth)
+        loginAuthBtn.setOnClickListener { loginIn(true) }
+
         val logoutBtn = findViewById<Button>(R.id.button_logout)
         logoutBtn.setOnClickListener { loginOut() }
 
@@ -69,7 +72,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun loginIn() {
+    fun loginIn(authorize: Boolean = false) {
         val self = this
         Log.d("MainActivity_auth", "login in button clicked")
         unipassInstance.login(object : UnipassCallBack<LoginOutput> {
@@ -83,7 +86,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(self, error.message, Toast.LENGTH_SHORT).show()
                 Log.d("MainActivity_auth", error.message ?: "Something went wrong")
             }
-        })
+        }, LoginOption(ConnectType.BOTH, authorize))
     }
 
     fun loginOut() {
