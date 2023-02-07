@@ -77,7 +77,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     private fun request(
         path: String,
         outputType: OutputType,
-        params: Map<String, Any>? = null
+        params: Map<String, Any?>? = null
     ) {
         currentAction = outputType
         val paramMap = mapOf(
@@ -195,13 +195,13 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         }
     }
 
-    fun login(callBack: UnipassCallBack<LoginOutput>, loginOption: LoginOption = LoginOption(ConnectType.BOTH, false, false)) {
-        supportLoginType = loginOption.connectType
+    fun login(callBack: UnipassCallBack<LoginOutput>, loginOption: LoginOption? = LoginOption()) {
+        supportLoginType = loginOption?.connectType
         loginCallBack = callBack
         resultLauncher.launch(Intent(context, UniPassActivity::class.java))
-        val params = mutableMapOf<String, Any>(
-            "authorize" to loginOption.authorize,
-            "returnEmail" to loginOption.returnEmail,
+        val params = mutableMapOf<String, Any?>(
+            "authorize" to loginOption?.authorize,
+            "returnEmail" to loginOption?.returnEmail,
         )
         request("connect", OutputType.Login, params)
     }

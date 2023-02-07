@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(self, error.message, Toast.LENGTH_SHORT).show()
                 Log.d("MainActivity_auth", error.message ?: "Something went wrong")
             }
-        }, LoginOption(ConnectType.BOTH, authorize, returnEmail))
+        }, LoginOption(authorize = authorize, returnEmail = returnEmail))
     }
 
     fun loginOut() {
