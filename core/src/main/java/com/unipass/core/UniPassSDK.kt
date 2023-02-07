@@ -195,12 +195,13 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         }
     }
 
-    fun login(callBack: UnipassCallBack<LoginOutput>, loginOption: LoginOption = LoginOption(ConnectType.BOTH, false)) {
+    fun login(callBack: UnipassCallBack<LoginOutput>, loginOption: LoginOption = LoginOption(ConnectType.BOTH, false, false)) {
         supportLoginType = loginOption.connectType
         loginCallBack = callBack
         resultLauncher.launch(Intent(context, UniPassActivity::class.java))
         val params = mutableMapOf<String, Any>(
-            "authorize" to loginOption.authorize
+            "authorize" to loginOption.authorize,
+            "returnEmail" to loginOption.returnEmail,
         )
         request("connect", OutputType.Login, params)
     }

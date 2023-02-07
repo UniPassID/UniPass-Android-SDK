@@ -3,6 +3,7 @@
     <string name="action_settings">Settings</string>
     <string name="login">Login</string>
     <string name="loginAuth">Login Auth</string>
+    <string name="loginAuthEmail">Login Auth Email</string>
     <string name="logout">Logout</string>
 
     <string name="hello_first_fragment">Hello first fragment</string>
