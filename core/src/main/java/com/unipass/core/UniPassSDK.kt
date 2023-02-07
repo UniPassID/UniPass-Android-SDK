@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.appcompat.app.AppCompatActivity
+import androidx.activity.ComponentActivity
 import androidx.browser.customtabs.CustomTabsIntent
 import com.google.gson.GsonBuilder
 import com.unipass.core.types.*
@@ -18,7 +18,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         "theme" to "dark",
     )
     private val context: Context
-    private val activity: AppCompatActivity
+    private val activity: ComponentActivity
     private var resultLauncher: ActivityResultLauncher<Intent>
     private var userInfo: UserInfo? = null
     private var walletUrl: Uri
