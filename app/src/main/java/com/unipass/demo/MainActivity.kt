@@ -13,6 +13,13 @@ import com.unipass.core.UniPassSDK
 import com.unipass.core.types.*
 import org.web3j.utils.Convert
 import org.web3j.utils.Convert.toWei
+import org.web3j.abi.FunctionEncoder
+import org.web3j.abi.datatypes.Address
+import org.web3j.abi.datatypes.Function
+import org.web3j.abi.datatypes.Type
+import org.web3j.abi.datatypes.generated.Uint256
+import java.math.BigInteger
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -126,6 +133,39 @@ class MainActivity : AppCompatActivity() {
                 }
             })
         }
+    }
+
+    fun getNFTData(_from: String?, _to: String?, _tokenId: BigInteger?): String? {
+        val function = Function(
+            "safeTransferFrom",
+            Arrays.asList<Type<*>>(
+                Address(_from),
+                Address(_to),
+                Uint256(_tokenId)
+            ), emptyList()
+        )
+        return FunctionEncoder.encode(function)
+    }
+
+    fun sendNFT() {
+        var self = this
+        var NFTInput = getNFTData(unipassInstance.getAddress(), "0x1A249119d9C637b5cdb9d3d82D64278bc7310f90", BigInteger("4"))
+        var transactionInput = SendTransactionInput(unipassInstance.getAddress(),
+            "0x8108cfb305114665c08b3c863d176fdb8ad601f4",
+            "0x",
+            NFTInput
+        )
+        unipassInstance.sendTransaction(transactionInput, object : UnipassCallBack<SendTransactionOutput> {
+            override fun success(output: SendTransactionOutput?) {
+                Log.d("MainActivity_unipassAuth", "success")
+                val transactionHashText = findViewById<TextView>(R.id.transaction_hash)
+                transactionHashText.text = output?.transactionHash
+            }
+            override fun failure(error: Exception) {
+                Toast.makeText(self, error.message, Toast.LENGTH_SHORT).show()
+                Log.d("MainActivity_unipassAuth", error.message ?: "Something went wrong")
+            }
+        })
     }
 
     fun sendTransaction() {
