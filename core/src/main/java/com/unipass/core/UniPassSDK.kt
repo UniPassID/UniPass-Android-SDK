@@ -1,11 +1,13 @@
 package com.unipass.core
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.ComponentActivity
+import androidx.activity.result.ActivityResult
 import androidx.browser.customtabs.CustomTabsIntent
 import com.google.gson.GsonBuilder
 import com.unipass.core.types.*
@@ -25,11 +27,11 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     private var redirectUrl: String? = ""
     private var supportLoginType: ConnectType? = ConnectType.BOTH
 
-    private lateinit var currentAction: OutputType
-    private lateinit var loginCallBack: UnipassCallBack<LoginOutput>
-    private lateinit var logoutCallBack: UnipassCallBack<Void>
-    private lateinit var signMsgCallBack: UnipassCallBack<SignOutput>
-    private lateinit var sendTransactionCallBack: UnipassCallBack<SendTransactionOutput>
+    private var currentAction: OutputType? = null
+    private var loginCallBack: UnipassCallBack<LoginOutput>? = null
+    private var logoutCallBack: UnipassCallBack<Void>? = null
+    private var signMsgCallBack: UnipassCallBack<SignOutput>? = null
+    private var sendTransactionCallBack: UnipassCallBack<SendTransactionOutput>? = null
 
     init {
         if(uniPassSDKOptions.appSettings != null){
@@ -57,7 +59,14 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         this.activity = uniPassSDKOptions.activity
 
         resultLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            setResultUrl(it.data?.data)
+            when (it.resultCode) {
+                Activity.RESULT_OK -> {
+                    setResultUrl(it.data?.data)
+                }
+                else -> {
+                    completeFutureWithException(UserInterruptedException())
+                }
+            }
         }
 
         // load session from local storage
@@ -122,10 +131,13 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     private fun completeFutureWithException(exception: Exception) {
         when (currentAction) {
-            OutputType.Login -> loginCallBack.failure(exception)
-            OutputType.Logout -> logoutCallBack.failure(exception)
-            OutputType.SignMessage -> signMsgCallBack.failure(exception)
-            OutputType.SendTransaction -> sendTransactionCallBack.failure(exception)
+            OutputType.Login -> loginCallBack?.failure(exception)
+            OutputType.Logout -> logoutCallBack?.failure(exception)
+            OutputType.SignMessage -> signMsgCallBack?.failure(exception)
+            OutputType.SendTransaction -> sendTransactionCallBack?.failure(exception)
+            else -> {
+                // do nothing
+            }
         }
     }
 
@@ -172,24 +184,24 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
                 ) as LoginOutput
                 SharedPreferenceUtil.saveItem(context, SharedPreferenceUtil.SESSION_KEY, gson.toJson(loginOutput.userInfo))
                 this.loadSession()
-                loginCallBack.success(loginOutput)
+                loginCallBack?.success(loginOutput)
             }
             OutputType.Logout -> {
-                logoutCallBack.success(null)
+                logoutCallBack?.success(null)
             }
             OutputType.SignMessage -> {
                 val signMessageOutput = gson.fromJson<SignOutput>(
                     decodeBase64URLString(hash).toString(Charsets.UTF_8),
                     SignOutput::class.java
                 )
-                signMsgCallBack.success(signMessageOutput)
+                signMsgCallBack?.success(signMessageOutput)
             }
             OutputType.SendTransaction -> {
                 val sendTransactionOutput = gson.fromJson<SendTransactionOutput>(
                     decodeBase64URLString(hash).toString(Charsets.UTF_8),
                     SendTransactionOutput::class.java
                 )
-                sendTransactionCallBack.success(sendTransactionOutput)
+                sendTransactionCallBack?.success(sendTransactionOutput)
             }
             else -> {}
         }
@@ -219,7 +231,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             resultLauncher.launch(Intent(context, UniPassActivity::class.java))
             request("logout", OutputType.Logout)
         } else {
-            logoutCallBack.success(null)
+            logoutCallBack?.success(null)
         }
     }
 
