@@ -32,6 +32,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     private var logoutCallBack: UnipassCallBack<Void>? = null
     private var signMsgCallBack: UnipassCallBack<SignOutput>? = null
     private var sendTransactionCallBack: UnipassCallBack<SendTransactionOutput>? = null
+    private var registedResolverId: Int = 10000
 
     init {
         if(uniPassSDKOptions.appSettings != null){
@@ -59,12 +60,14 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         this.activity = uniPassSDKOptions.activity
 
         resultLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            when (it.resultCode) {
-                Activity.RESULT_OK -> {
-                    setResultUrl(it.data?.data)
-                }
-                else -> {
-                    completeFutureWithException(UserInterruptedException())
+            if (it.data?.getIntExtra("resolverId", 0) == registedResolverId) {
+                when (it.resultCode) {
+                    Activity.RESULT_OK -> {
+                        setResultUrl(it.data?.data)
+                    }
+                    else -> {
+                        completeFutureWithException(UserInterruptedException())
+                    }
                 }
             }
         }
@@ -207,10 +210,20 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         }
     }
 
+    private fun launchInit() {
+        if (registedResolverId > 99999) {
+            registedResolverId = 10000
+        }
+        registedResolverId += 1
+        var init = Intent(context, UniPassActivity::class.java)
+        init.putExtra("resolverId", registedResolverId)
+        resultLauncher.launch(init)
+    }
+
     fun login(callBack: UnipassCallBack<LoginOutput>, loginOption: LoginOption? = LoginOption()) {
         supportLoginType = loginOption?.connectType
         loginCallBack = callBack
-        resultLauncher.launch(Intent(context, UniPassActivity::class.java))
+        launchInit()
         val params = mutableMapOf<String, Any?>(
             "authorize" to loginOption?.authorize,
             "returnEmail" to loginOption?.returnEmail,
@@ -228,7 +241,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
         SharedPreferenceUtil.deleteItem(context, SharedPreferenceUtil.SESSION_KEY)
         logoutCallBack = callBack
         if (deep) {
-            resultLauncher.launch(Intent(context, UniPassActivity::class.java))
+            launchInit()
             request("logout", OutputType.Logout)
         } else {
             logoutCallBack?.success(null)
@@ -237,7 +250,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     fun signMessage(signInput: SignInput, callBack: UnipassCallBack<SignOutput>, redirectUrl: Uri? = null) {
         signMsgCallBack = callBack
-        resultLauncher.launch(Intent(context, UniPassActivity::class.java))
+        launchInit()
         val params = mutableMapOf<String, Any>(
             "from" to signInput.from,
             "type" to signInput.type.toString(),
@@ -248,7 +261,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     fun sendTransaction(sendTransactionInput: SendTransactionInput, callBack: UnipassCallBack<SendTransactionOutput>) {
         sendTransactionCallBack = callBack
-        resultLauncher.launch(Intent(context, UniPassActivity::class.java))
+        launchInit()
         val params = mutableMapOf<String, Any>(
             "from" to sendTransactionInput.from,
             "to" to sendTransactionInput.to,
