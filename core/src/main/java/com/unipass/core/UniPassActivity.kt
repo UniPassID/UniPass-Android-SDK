@@ -7,9 +7,11 @@ import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
 
 class UniPassActivity : AppCompatActivity() {
+    private var resolverId = 0;
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (intent.extras != null) {
+        resolverId = intent.getIntExtra("resolverId", 0)
+        if (resolverId == 0) {
             // activity created by others should been finish directly
             finish()
         }
@@ -17,6 +19,7 @@ class UniPassActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setResult(RESULT_OK, intent);
+        intent?.putExtra("resolverId", resolverId)
         finish()
     }
 
@@ -24,6 +27,7 @@ class UniPassActivity : AppCompatActivity() {
         super.onRestart()
         Handler(Looper.getMainLooper()).postDelayed({
             // in case user close browser directly
+            intent?.putExtra("resolverId", resolverId)
             finish()
         }, 300)
     }
