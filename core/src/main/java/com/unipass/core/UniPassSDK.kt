@@ -52,6 +52,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
                 uniPassSDKOptions.walletUrl = "https://wallet.unipass.id"
             } else {
                 uniPassSDKOptions.walletUrl = "https://testnet.wallet.unipass.id"
+                uniPassSDKOptions.walletUrl = "https://d.wallet.unipass.vip"
             }
         }
         walletUrl = Uri.parse(uniPassSDKOptions.walletUrl)
@@ -167,6 +168,13 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
             when (output.errorCode) {
                 401 -> {
                     completeFutureWithException(UserCancelledException())
+                }
+                409 -> {
+                    // address inconsistent
+                    // clear userInfo
+                    userInfo = null
+                    SharedPreferenceUtil.deleteItem(context, SharedPreferenceUtil.SESSION_KEY)
+                    completeFutureWithException(UserAddressInconsistentException())
                 }
                 else -> {
                     completeFutureWithException(
