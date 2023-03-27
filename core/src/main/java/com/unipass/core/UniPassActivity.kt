@@ -18,8 +18,8 @@ class UniPassActivity : AppCompatActivity() {
     }
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        setResult(RESULT_OK, intent);
         intent?.putExtra("resolverId", resolverId)
+        setResult(RESULT_OK, intent);
         finish()
     }
 
