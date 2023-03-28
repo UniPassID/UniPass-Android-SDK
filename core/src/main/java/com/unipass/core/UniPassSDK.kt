@@ -52,7 +52,6 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
                 uniPassSDKOptions.walletUrl = "https://wallet.unipass.id"
             } else {
                 uniPassSDKOptions.walletUrl = "https://testnet.wallet.unipass.id"
-                uniPassSDKOptions.walletUrl = "https://d.wallet.unipass.vip"
             }
         }
         walletUrl = Uri.parse(uniPassSDKOptions.walletUrl)
