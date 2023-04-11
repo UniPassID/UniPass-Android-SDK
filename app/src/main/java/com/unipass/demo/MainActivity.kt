@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.widget.Button
 import android.widget.EditText
 import android.widget.RadioGroup
+import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import com.unipass.core.UniPassSDK
@@ -24,6 +25,7 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
 
     private lateinit var unipassInstance: UniPassSDK
+    private var forceLogin: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,6 +50,11 @@ class MainActivity : AppCompatActivity() {
 
         val loginAuthBtn = findViewById<Button>(R.id.button_login_auth)
         loginAuthBtn.setOnClickListener { loginIn(true) }
+
+        val forceLoginBtn = findViewById<Switch>(R.id.forceLogin)
+        forceLoginBtn.setOnCheckedChangeListener { buttonView, isChecked ->
+            forceLogin = isChecked
+        }
 
         val loginAuthEmailBtn = findViewById<Button>(R.id.button_login_auth_email)
         loginAuthEmailBtn.setOnClickListener { loginIn(true, true) }
@@ -96,7 +103,7 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(self, error.message, Toast.LENGTH_SHORT).show()
                 Log.d("MainActivity_auth", error.message ?: "Something went wrong")
             }
-        }, LoginOption(authorize = authorize, returnEmail = returnEmail))
+        }, LoginOption(authorize = authorize, returnEmail = returnEmail, forceLogin = forceLogin))
     }
 
     fun loginOut() {

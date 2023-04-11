@@ -26,6 +26,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
     private var walletUrl: Uri
     private var redirectUrl: String? = ""
     private var supportLoginType: ConnectType? = ConnectType.BOTH
+    private var forceLogin: String = "0"
 
     private var currentAction: OutputType? = null
     private var loginCallBack: UnipassCallBack<LoginOutput>? = null
@@ -108,6 +109,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
         if (outputType == OutputType.Login) {
             uri.appendQueryParameter("connectType", supportLoginType.toString().lowercase())
+            uri.appendQueryParameter("forceLogin", forceLogin)
         }
 
         uri.appendQueryParameter("redirectUrl", redirectUrl)
@@ -229,6 +231,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
 
     fun login(callBack: UnipassCallBack<LoginOutput>, loginOption: LoginOption? = LoginOption()) {
         supportLoginType = loginOption?.connectType
+        forceLogin = if(loginOption?.forceLogin == true) "1" else "0"
         loginCallBack = callBack
         launchInit()
         val params = mutableMapOf<String, Any?>(

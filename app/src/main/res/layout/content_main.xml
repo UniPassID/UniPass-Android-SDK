@@ -17,6 +17,15 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintVertical_bias="0.1" />
 
+    <Switch
+        android:id="@+id/forceLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="80dp"
+        android:text="forceLogin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/userAddress" />
+
     <Button
         android:id="@+id/button_login"
         android:layout_width="250dp"
@@ -25,7 +34,7 @@
         android:layout_marginTop="10dp"
         android:text="@string/login"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/userAddress" />
+        app:layout_constraintTop_toBottomOf="@id/forceLogin" />
 
     <Button
         android:id="@+id/button_login_auth"
