@@ -7,7 +7,6 @@ import android.net.Uri
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResult
 import androidx.browser.customtabs.CustomTabsIntent
 import com.google.gson.GsonBuilder
 import com.unipass.core.types.*
@@ -72,7 +71,7 @@ class UniPassSDK(uniPassSDKOptions: UniPassSDKOptions) {
                 }
             }
         }
-
+    
         // load session from local storage
         loadSession()
     }
